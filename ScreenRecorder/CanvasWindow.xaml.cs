@@ -299,13 +299,14 @@ namespace ScreenRecorder
             
         }
 
+        // ShortCuts from Keyboard
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.Key == Key.F5)
             {
 
                 MainWindow mainScreen = new MainWindow();
-                mainScreen.ScreenShot(this._lastPoint, this.RecodBorderSizeObject.Width, this.RecodBorderSizeObject.Height, true);
+                mainScreen.ScreenShot(this._point, this.RecodBorderSizeObject.Width, this.RecodBorderSizeObject.Height, true);
                 mainScreen.Show();               
                 this.Close();
                

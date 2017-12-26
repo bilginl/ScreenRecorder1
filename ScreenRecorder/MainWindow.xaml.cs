@@ -27,60 +27,82 @@ namespace ScreenRecorder
     {
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);
+        private string ScreenPath;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
         public static AutoResetEvent autoReset = new AutoResetEvent(false);
         public MainWindow()
         {
             InitializeComponent();
         }
+        public void SaveMyFile(Bitmap inBmpImg)
+        {
 
+
+            ScreenPath = "";
+
+            saveFileDialog1.DefaultExt = "bmp";
+            saveFileDialog1.Filter = "bmp files (*.bmp)|*.bmp|jpg files (*.jpg)|*.jpg|tiff files (*.tiff)|*.tiff|png files (*.png)|*.png";
+            saveFileDialog1.Title = "Save screenshot to...";
+            saveFileDialog1.ShowDialog();
+            ScreenPath = saveFileDialog1.FileName;
+
+  
+
+
+            if (ScreenPath != "" )
+            {
+
+                inBmpImg.Save(ScreenPath);
+
+            }
+
+            else
+            {
+
+                System.Windows.MessageBox.Show("File save cancelled", "TeboScreen", MessageBoxButton.OK);
+            }
+
+        }
         public void ScreenShot(System.Windows.Point inXYPoint, double inWidth, double inHeight,bool inIsROISelected )
         {
 
             if (inIsROISelected)
             {
+                System.Drawing.Point SourcePoint = new System.Drawing.Point(Convert.ToInt32(inXYPoint.X),Convert.ToInt32(inXYPoint.Y));
+                System.Drawing.Point DestinationPoint = new System.Drawing.Point(0,0);
 
                 System.Drawing.Size imgSize = new System.Drawing.Size();
                 imgSize.Width = (int)inWidth;
                 imgSize.Height = (int)inHeight;
-                /*
-                                Bitmap bmpImage = new System.Drawing.Bitmap((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight,
-                                                                            System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-                                using (System.Drawing.Graphics graph = System.Drawing.Graphics.FromImage(bmpImage))
-                                {
-                                    // take an empty shot
-                                    Console.WriteLine("Bitmap Image Size: " + bmpImage.Size);
-                                    graph.CopyFromScreen((int)inXYPoint.X, (int)inXYPoint.Y, (int)(inXYPoint.X + inWidth),
-                                             (int)(inXYPoint.Y + inHeight),imgSize);
-                                }
-
-                                IntPtr handle = IntPtr.Zero;
-
-                                try
-                                {
-
-                                    handle = bmpImage.GetHbitmap();
-
-                                    //Convert to WPF image.
-                                    ImgBox.Source = Imaging.CreateBitmapSourceFromHBitmap(handle,
-                                                            IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                    bmpImage.Save("myImage.bmp");
-                                }
-                                finally
-                                {
-                                    DeleteObject(handle);
-                                }
-                */
-                using (Bitmap bmpImage = new System.Drawing.Bitmap((int)inWidth, (int)inHeight))
-                { 
-                    using (System.Drawing.Graphics graph = System.Drawing.Graphics.FromImage(bmpImage))
-                    {
+                
+                Bitmap bmpImage = new System.Drawing.Bitmap((int)inWidth, (int)inHeight,
+                                                            System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+                using (System.Drawing.Graphics graph = System.Drawing.Graphics.FromImage(bmpImage))
+                {
                     // take an empty shot
-                        Console.WriteLine("Bitmap Image Size: " + bmpImage.Size);
-                        graph.CopyFromScreen((int)inXYPoint.X, (int)inXYPoint.Y, (int)(inXYPoint.X + inWidth),
-                             (int)(inXYPoint.Y + inHeight), bmpImage.Size);
-                    }
-                    bmpImage.Save("myImage.bmp",System.Drawing.Imaging.ImageFormat.Bmp);
+                    Console.WriteLine("Bitmap Image Size: " + bmpImage.Size);
+                    graph.CopyFromScreen(SourcePoint,DestinationPoint,bmpImage.Size);
                 }
+
+                IntPtr handle = IntPtr.Zero;
+
+                try
+                {
+
+                    handle = bmpImage.GetHbitmap();
+
+                    //Convert to WPF image.
+                    ImgBox.Source = Imaging.CreateBitmapSourceFromHBitmap(handle,
+                                            IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                    SaveMyFile(bmpImage);
+                }
+                finally
+                {
+                    DeleteObject(handle);
+                }
+                
+
 
             }
         }
@@ -98,7 +120,11 @@ namespace ScreenRecorder
         {
             if (e.Key == Key.Escape)
             {
-                Application.Current.Shutdown();
+                System.Windows.Application.Current.Shutdown();
+            }
+            else if (e.Key == Key.S)
+            {
+                System.Windows.Application.Current.Shutdown();
             }
         }
     }
